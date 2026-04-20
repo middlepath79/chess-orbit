@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Orbit Chess - The Living Chess Universe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'Georgia', 'Times New Roman', serif;
+        }
+        
+        /* Loading screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #030614;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 1s;
+            font-family: monospace;
+        }
+        
+        .loader-content {
+            text-align: center;
+            color: #ffaa44;
+        }
+        
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #ffaa44;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Main UI */
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #ffdd99;
+            background: rgba(0,0,0,0.85);
+            padding: 12px 24px;
+            border-radius: 30px;
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            pointer-events: none;
+            font-size: 14px;
+            border-left: 4px solid #ff6600;
+            font-family: monospace;
+        }
+        
+        #title {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #ffaa33;
+            background: rgba(0,0,0,0.8);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            font-size: 20px;
+            letter-spacing: 2px;
+            z-index: 100;
+            pointer-events: none;
+            text-shadow: 0 0 15px rgba(255,170,51,0.6);
+            border: 1px solid #ffaa33;
+        }
+        
+        /* News Panel */
+        #news-panel {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            max-height: 55vh;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border-left: 3px solid #ff6600;
+            color: #eee;
+            padding: 15px;
+            z-index: 100;
+            font-family: monospace;
+            font-size: 12px;
+            pointer-events: auto;
+            transition: 0.3s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+        
+        #news-panel::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+        #news-panel::-webkit-scrollbar-track {
+            background: #222;
+        }
+        
+        #news-panel::-webkit-scrollbar-thumb {
+            background: #ffaa44;
+        }
+        
+        #news-panel h3 {
+            margin: 0 0 8px 0;
+            color: #ffaa44;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .news-item {
+            padding: 10px 8px;
+            border-bottom: 1px solid rgba(255,170,68,0.2);
+            cursor: pointer;
+            transition: 0.2s;
+            border-radius: 8px;
+        }
+        
+        .news-item:hover {
+            background: rgba(255,170,68,0.15);
+            transform: translateX(4px);
+        }
+        
+        .news-title {
+            font-weight: bold;
+            color: #ffcc88;
+            font-size: 13px;
+        }
+        
+        .news-date {
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 4px;
+        }
+        
+        .tournament {
+            border-left: 2px solid #ff6600;
+        }
+        
+        .live-badge {
+            background: #ff3300;
+            color: white;
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 8px;
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        #instruction {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            text-align: left;
+            color: rgba(255,255,255,0.6);
+            background: rgba(0,0,0,0.5);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 11px;
+            z-index: 100;
+            pointer-events: none;
+            font-family: monospace;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.95);
+            color: #ffaa44;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 14px;
+            z-index: 200;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            font-family: monospace;
+            border: 1px solid #ffaa44;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+        
+        .refresh-status {
+            font-size: 10px;
+            text-align: center;
+            margin-top: 12px;
+            padding-top: 8px;
+            color: #ffaa66;
+            cursor: pointer;
+            border-top: 1px solid rgba(255,170,68,0.3);
+        }
+        
+        .refresh-status:hover {
+            text-decoration: underline;
+            color: #ffcc88;
+        }
+        
+        .close-news {
+            float: right;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #ffaa44;
+            font-size: 18px;
+            transition: 0.2s;
+        }
+        
+        .close-news:hover {
+            color: #ffcc88;
+            transform: scale(1.1);
+        }
+        
+        .news-stats {
+            font-size: 9px;
+            color: #ffaa66;
+            text-align: center;
+            margin-top: 8px;
+        }
+        
+        /* ========== FOOTER STYLES ========== */
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(10,10,30,0.95) 100%);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,170,68,0.3);
+            padding: 15px 30px;
+            z-index: 99;
+            font-family: 'Segoe UI', monospace;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            pointer-events: auto;
+        }
+        
+        .footer.visible {
+            transform: translateY(0);
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .footer-brand-icon {
+            font-size: 28px;
+            animation: rotateSlow 8s linear infinite;
+        }
+        
+        @keyframes rotateSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .footer-brand-text {
+            color: #ffdd99;
+        }
+        
+        .footer-brand-text h4 {
+            font-size: 16px;
+            margin: 0;
+            color: #ffaa44;
+        }
+        
+        .footer-brand-text p {
+            font-size: 10px;
+            margin: 4px 0 0;
+            color: #aaa;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 12px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .footer-links a:hover {
+            color: #ffaa44;
+            transform: translateY(-2px);
+        }
+        
+        .social-icons {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .social-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(255,170,68,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            cursor: pointer;
+            border: 1px solid rgba(255,170,68,0.3);
+            font-size: 20px;
+            text-decoration: none;
+            color: #ffaa66;
+        }
+        
+        .social-icon:hover {
+            background: rgba(255,170,68,0.3);
+            transform: translateY(-3px) scale(1.05);
+            border-color: #ffaa44;
+            color: #ffcc88;
+            box-shadow: 0 0 15px rgba(255,170,68,0.3);
+        }
+        
+        .footer-copyright {
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+            border-top: 1px solid rgba(255,170,68,0.2);
+            padding-top: 12px;
+            margin-top: 12px;
+        }
+        
+        .footer-toggle {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            border: 1px solid #ffaa44;
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+            padding: 6px 20px;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 14px;
+            color: #ffaa44;
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+        }
+        
+        .footer-toggle:hover {
+            background: rgba(255,170,68,0.2);
+            padding-bottom: 8px;
+        }
+        
+        @media (max-width: 800px) {
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 12px;
+            }
+            .footer-links {
+                justify-content: center;
+            }
+            .social-icons {
+                justify-content: center;
+            }
+            .footer {
+                padding: 12px 20px;
+            }
+            #news-panel {
+                width: 280px;
+                max-height: 50vh;
+                bottom: 60px;
+            }
+        }
+        
+        @media (max-width: 700px) {
+            #news-panel { width: 280px; font-size: 10px; padding: 10px; bottom: 60px; right: 10px; max-height: 50vh; }
+            #title { font-size: 14px; top: 10px; right: 10px; }
+            #info { font-size: 10px; top: 10px; left: 10px; }
+            .toast { font-size: 11px; bottom: 80px; white-space: nowrap; }
+            .footer-toggle { font-size: 10px; padding: 4px 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div>♔ ORBIT CHESS ♚</div>
+            <div style="font-size: 12px; margin-top: 10px;">Loading the chess universe...</div>
+        </div>
+    </div>
+    
+    <div id="info">
+        🎯 <strong>CLICK ORBITING PIECES</strong> → Games & Articles<br>
+        📰 <strong>GOLDEN COMET</strong> → Live Tournaments
+    </div>
+    <div id="title">
+        ♔ ORBIT CHESS ♚
+    </div>
+    <div id="instruction">
+        🖱️ Drag to orbit • Scroll to zoom • Click pieces to explore<br>
+        🌟 <strong>Click the golden comet</strong> for live tournament news
+    </div>
+    
+    <div id="news-panel" style="display: block;">
+        <button class="close-news" onclick="document.getElementById('news-panel').style.display='none'">✕</button>
+        <h3>📰 LIVE CHESS TOURNAMENTS</h3>
+        <div id="news-content">
+            <div style="text-align: center; padding: 20px;">🔄 Loading tournaments...</div>
+        </div>
+        <div class="refresh-status" onclick="fetchChessNews()">
+            🔄 Click to refresh news
+        </div>
+        <div class="news-stats" id="news-stats"></div>
+    </div>
+    
+    <!-- Footer Toggle Button -->
+    <div class="footer-toggle" id="footerToggle">
+        🔗 CONNECT & FOLLOW ▲
+    </div>
+    
+    <!-- Footer -->
+    <footer class="footer" id="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="footer-brand-icon">♔</div>
+                <div class="footer-brand-text">
+                    <h4>ORBIT CHESS</h4>
+                    <p>Interactive Chess Universe • est. 2025</p>
+                </div>
+            </div>
+            
+            <div class="footer-links">
+                <a href="#" onclick="showMessage('📧 Contact: hello@orbitchess.com'); return false;">
+                    📧 Contact
+                </a>
+                <a href="#" onclick="showMessage('📝 Blog coming soon!'); return false;">
+                    📝 Blog
+                </a>
+                <a href="#" onclick="window.open('https://github.com', '_blank');">
+                    💻 GitHub
+                </a>
+                <a href="#" onclick="showMessage('✨ API Status: All systems operational'); return false;">
+                    🚀 API Status
+                </a>
+            </div>
+            
+            <div class="social-icons">
+                <a href="#" class="social-icon" onclick="window.open('https://twitter.com/chess', '_blank'); return false;">🐦</a>
+                <a href="#" class="social-icon" onclick="window.open('https://github.com/lichess-org', '_blank'); return false;">🐙</a>
+                <a href="#" class="social-icon" onclick="window.open('https://discord.gg/chess', '_blank'); return false;">💬</a>
+                <a href="#" class="social-icon" onclick="window.open('https://www.twitch.tv/directory/game/Chess', '_blank'); return false;">📺</a>
+                <a href="#" class="social-icon" onclick="window.open('https://www.reddit.com/r/chess/', '_blank'); return false;">🔴</a>
+                <a href="#" class="social-icon" onclick="window.open('https://www.instagram.com/chess/', '_blank'); return false;">📷</a>
+            </div>
+        </div>
+        <div class="footer-copyright">
+            © 2025 Orbit Chess • Open Source • Powered by Three.js • ♞ Made with passion for chess
+        </div>
+    </footer>
+    
+    <div id="toast" class="toast" style="opacity:0;">✨</div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+        // --- Footer Toggle Logic ---
+        const footer = document.getElementById('footer');
+        const footerToggle = document.getElementById('footerToggle');
+        let footerVisible = false;
+        
+        footerToggle.addEventListener('click', () => {
+            footerVisible = !footerVisible;
+            if (footerVisible) {
+                footer.classList.add('visible');
+                footerToggle.innerHTML = '🔗 CONNECT & FOLLOW ▼';
+            } else {
+                footer.classList.remove('visible');
+                footerToggle.innerHTML = '🔗 CONNECT & FOLLOW ▲';
+            }
+        });
+        
+        // Auto-show footer after 3 seconds on first load
+        setTimeout(() => {
+            if (!footerVisible) {
+                footerVisible = true;
+                footer.classList.add('visible');
+                footerToggle.innerHTML = '🔗 CONNECT & FOLLOW ▼';
+            }
+        }, 3000);
+
+        // --- Loading Screen ---
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const loadingScreen = document.getElementById('loading-screen');
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 1000);
+            }, 1500);
+        });
+
+        // --- Setup Scene ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x030614);
+        scene.fog = new THREE.FogExp2(0x030614, 0.0004);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 3.5, 14);
+        camera.lookAt(0, 0, 0);
+
+        const labelRenderer = new CSS2DRenderer();
+        labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        labelRenderer.domElement.style.position = 'absolute';
+        labelRenderer.domElement.style.top = '0px';
+        labelRenderer.domElement.style.left = '0px';
+        labelRenderer.domElement.style.pointerEvents = 'none';
+        document.body.appendChild(labelRenderer.domElement);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = false;
+        controls.enableZoom = true;
+        controls.zoomSpeed = 1.0;
+        controls.rotateSpeed = 0.8;
+        controls.target.set(0, 0, 0);
+
+        // --- Lighting ---
+        const ambientLight = new THREE.AmbientLight(0x222222);
+        scene.add(ambientLight);
+        
+        const mainLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+        mainLight.position.set(5, 8, 6);
+        mainLight.castShadow = true;
+        scene.add(mainLight);
+        
+        const fillLight = new THREE.PointLight(0x5577aa, 0.4);
+        fillLight.position.set(0, -2, 0);
+        scene.add(fillLight);
+        
+        const backLight = new THREE.PointLight(0xffaa66, 0.5);
+        backLight.position.set(-3, 2, -5);
+        scene.add(backLight);
+        
+        const hemiLight = new THREE.HemisphereLight(0x445566, 0x221100, 0.5);
+        scene.add(hemiLight);
+
+        // --- Starfield ---
+        const starGeometry = new THREE.BufferGeometry();
+        const starCount = 3000;
+        const starPositions = new Float32Array(starCount * 3);
+        for (let i = 0; i < starCount; i++) {
+            starPositions[i*3] = (Math.random() - 0.5) * 2000;
+            starPositions[i*3+1] = (Math.random() - 0.5) * 1000;
+            starPositions[i*3+2] = (Math.random() - 0.5) * 800 - 300;
+        }
+        starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.18, transparent: true, opacity: 0.7 });
+        const stars = new THREE.Points(starGeometry, starMaterial);
+        scene.add(stars);
+        
+        const starGeo2 = new THREE.BufferGeometry();
+        const starPos2 = new Float32Array(1500 * 3);
+        for (let i = 0; i < 1500; i++) {
+            starPos2[i*3] = (Math.random() - 0.5) * 2500;
+            starPos2[i*3+1] = (Math.random() - 0.5) * 1200;
+            starPos2[i*3+2] = (Math.random() - 0.5) * 1000 - 500;
+        }
+        starGeo2.setAttribute('position', new THREE.BufferAttribute(starPos2, 3));
+        const starMat2 = new THREE.PointsMaterial({ color: 0xaaccff, size: 0.1, transparent: true });
+        const stars2 = new THREE.Points(starGeo2, starMat2);
+        scene.add(stars2);
+
+        // --- Central Sun ---
+        const sunMat = new THREE.MeshStandardMaterial({ color: 0xdd9933, emissive: 0x552200, emissiveIntensity: 0.7, metalness: 0.2 });
+        const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(1.0, 64, 64), sunMat);
+        sunMesh.castShadow = true;
+        scene.add(sunMesh);
+        
+        const coreGlow = new THREE.PointLight(0xff8844, 1.0, 18);
+        coreGlow.position.set(0, 0, 0);
+        scene.add(coreGlow);
+        
+        const coronaRing = new THREE.Mesh(
+            new THREE.TorusGeometry(1.3, 0.05, 64, 200),
+            new THREE.MeshStandardMaterial({ color: 0xffaa55, emissive: 0x442200 })
+        );
+        coronaRing.rotation.x = Math.PI / 2;
+        scene.add(coronaRing);
+        
+        const centerDiv = document.createElement('div');
+        centerDiv.textContent = '⚡ ORBIT CHESS ⚡';
+        centerDiv.style.color = '#ffcc66';
+        centerDiv.style.fontSize = '18px';
+        centerDiv.style.fontWeight = 'bold';
+        centerDiv.style.fontFamily = 'Georgia, serif';
+        centerDiv.style.textShadow = '0 0 12px orange';
+        centerDiv.style.background = 'rgba(0,0,0,0.6)';
+        centerDiv.style.padding = '6px 18px';
+        centerDiv.style.borderRadius = '40px';
+        centerDiv.style.border = '1px solid #ffaa44';
+        const centerLabel = new CSS2DObject(centerDiv);
+        centerLabel.position.set(0, 1.2, 0);
+        scene.add(centerLabel);
+
+        // --- Chess Piece Factory ---
+        function createRealisticPiece(type, colorHex, metalnessVal = 0.85) {
+            const group = new THREE.Group();
+            const material = new THREE.MeshStandardMaterial({ color: colorHex, metalness: metalnessVal, roughness: 0.25 });
+            
+            if (type === 'king') {
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 0.7, 48), material);
+                base.position.y = 0;
+                group.add(base);
+                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.55, 0.6, 48), material);
+                body.position.y = 0.45;
+                group.add(body);
+                const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.38, 0.3, 32), material);
+                neck.position.y = 0.9;
+                group.add(neck);
+                const topSphere = new THREE.Mesh(new THREE.SphereGeometry(0.32, 48, 48), material);
+                topSphere.position.y = 1.12;
+                group.add(topSphere);
+                const crossBar = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.08, 0.45), new THREE.MeshStandardMaterial({ color: 0xffcc77, metalness: 0.9 }));
+                crossBar.position.y = 1.32;
+                group.add(crossBar);
+            } 
+            else if (type === 'queen') {
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.62, 0.7, 48), material);
+                base.position.y = 0;
+                group.add(base);
+                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.52, 0.65, 48), material);
+                body.position.y = 0.48;
+                group.add(body);
+                const top = new THREE.Mesh(new THREE.SphereGeometry(0.28, 48, 48), material);
+                top.position.y = 1.18;
+                group.add(top);
+            }
+            else if (type === 'knight') {
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 0.65, 48), material);
+                base.position.y = 0;
+                group.add(base);
+                const horseHead = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.7, 32), material);
+                horseHead.position.set(0.2, 0.92, 0);
+                group.add(horseHead);
+                const mane = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.35, 0.35, 8), new THREE.MeshStandardMaterial({ color: 0xccaa88 }));
+                mane.position.set(0.45, 1.02, 0);
+                group.add(mane);
+            }
+            else if (type === 'rook') {
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 0.7, 48), material);
+                base.position.y = 0;
+                group.add(base);
+                const tower = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.8, 0.7), material);
+                tower.position.y = 0.55;
+                group.add(tower);
+            }
+            else {
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.55, 0.6, 48), material);
+                base.position.y = 0;
+                group.add(base);
+                const top = new THREE.Mesh(new THREE.SphereGeometry(0.25, 48, 48), material);
+                top.position.y = 0.85;
+                group.add(top);
+            }
+            
+            group.castShadow = true;
+            return group;
+        }
+        
+        // --- Comet ---
+        const cometGroup = new THREE.Group();
+        const cometCore = new THREE.Mesh(
+            new THREE.SphereGeometry(0.55, 48, 48),
+            new THREE.MeshStandardMaterial({ color: 0xff6600, emissive: 0xff3300, emissiveIntensity: 0.8 })
+        );
+        cometGroup.add(cometCore);
+        
+        const tailParticles = [];
+        for (let i = 0; i < 30; i++) {
+            const particle = new THREE.Mesh(
+                new THREE.SphereGeometry(0.05, 8, 8),
+                new THREE.MeshStandardMaterial({ color: 0xff8844, emissive: 0xff4411 })
+            );
+            particle.visible = false;
+            cometGroup.add(particle);
+            tailParticles.push(particle);
+        }
+        
+        const cometRing = new THREE.Mesh(
+            new THREE.TorusGeometry(0.7, 0.04, 32, 60),
+            new THREE.MeshStandardMaterial({ color: 0xffaa55, emissive: 0xff5522 })
+        );
+        cometRing.rotation.x = Math.PI / 2;
+        cometGroup.add(cometRing);
+        
+        scene.add(cometGroup);
+        
+        const newsDiv = document.createElement('div');
+        newsDiv.innerHTML = '📰 <strong>LIVE TOURNAMENTS</strong><br><span style="font-size:9px;">Click for updates →</span>';
+        newsDiv.style.color = '#ffaa44';
+        newsDiv.style.background = 'rgba(0,0,0,0.85)';
+        newsDiv.style.padding = '6px 14px';
+        newsDiv.style.borderRadius = '30px';
+        newsDiv.style.border = '2px solid #ff6600';
+        newsDiv.style.fontSize = '11px';
+        newsDiv.style.whiteSpace = 'nowrap';
+        newsDiv.style.fontWeight = 'bold';
+        const newsLabel = new CSS2DObject(newsDiv);
+        newsLabel.position.set(0, 1.1, 0);
+        cometGroup.add(newsLabel);
+        
+        // --- Orbiting Pieces ---
+        const planetsData = [
+            { type: 'queen', color: 0xeeaa44, orbit: 2.6, speed: 0.55, yOff: 0, link: 'https://lichess.org', label: '♕ LICHESS', desc: 'Free online play', icon: '🎮' },
+            { type: 'king', color: 0xdd8855, orbit: 3.7, speed: 0.46, yOff: 0.1, link: 'https://chess.com', label: '♔ CHESS.COM', desc: 'Largest community', icon: '👑' },
+            { type: 'knight', color: 0x88aadd, orbit: 4.8, speed: 0.39, yOff: -0.1, link: '#history', label: '📜 HISTORY', desc: '1500 years of chess', icon: '🏛️' },
+            { type: 'queen', color: 0xccaa77, orbit: 5.9, speed: 0.33, yOff: 0.15, link: '#cognitive', label: '🧠 BRAIN', desc: 'Cognitive benefits', icon: '💡' },
+            { type: 'rook', color: 0xbb9966, orbit: 7.0, speed: 0.28, yOff: -0.05, link: 'https://lichess.org/variant', label: '♟️ VARIANTS', desc: 'Crazyhouse, 960', icon: '🎲' }
+        ];
+        
+        const orbitingPieces = [];
+        
+        planetsData.forEach(data => {
+            const pieceGroup = createRealisticPiece(data.type, data.color, 0.8);
+            pieceGroup.position.y = data.yOff;
+            
+            const ringGeo = new THREE.TorusGeometry(data.orbit + 0.06, 0.03, 64, 200);
+            const ringMat = new THREE.MeshStandardMaterial({ color: 0x88aaff, transparent: true, opacity: 0.3 });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            pieceGroup.add(ring);
+            
+            const div = document.createElement('div');
+            div.innerHTML = `<strong>${data.icon} ${data.label}</strong><br><span style="font-size:9px;">${data.desc}</span>`;
+            div.style.color = '#ffeedd';
+            div.style.fontSize = '11px';
+            div.style.textAlign = 'center';
+            div.style.background = 'rgba(0,0,0,0.7)';
+            div.style.padding = '5px 12px';
+            div.style.borderRadius = '20px';
+            div.style.border = `1px solid ${new THREE.Color(data.color).getStyle()}`;
+            const labelObj = new CSS2DObject(div);
+            labelObj.position.set(0, 1.0, 0);
+            pieceGroup.add(labelObj);
+            
+            scene.add(pieceGroup);
+            
+            orbitingPieces.push({
+                obj: pieceGroup,
+                orbitRadius: data.orbit,
+                speed: data.speed,
+                angle: Math.random() * Math.PI * 2,
+                yOffset: data.yOff,
+                link: data.link,
+                label: data.label
+            });
+        });
+        
+        const cometData = {
+            obj: cometGroup,
+            orbitRadius: 8.5,
+            speed: 0.48,
+            angle: Math.PI,
+            yOffset: 0.2
+        };
+        
+        // --- Tournament Database ---
+        const tournamentDatabase = {
+            major: [
+                { title: "🏆 FIDE World Championship 2025", date: "November 20 - December 15, 2025 • Singapore", url: "https://worldchess.com", isLive: false, prize: "€2,000,000" },
+                { title: "👑 FIDE Candidates Tournament 2025", date: "April 1-25, 2025 • Toronto, Canada", url: "https://candidates.fide.com", isLive: false, prize: "€500,000" },
+                { title: "🇺🇸 US Chess Championship", date: "October 5-18, 2025 • St. Louis", url: "https://uschesschamps.com", isLive: false, prize: "$300,000" }
+            ],
+            online: [
+                { title: "⚡ Lichess Elite Arena", date: "Every Saturday • 15:00 UTC", url: "https://lichess.org/tournament", isLive: true, prize: "Trophies" },
+                { title: "🎮 Chess.com Blitz Battle", date: "Daily • Various times", url: "https://chess.com/tournaments", isLive: true, prize: "Cash & Prizes" },
+                { title: "🌐 Chess24 Legends League", date: "Weekly • Sundays 18:00 CET", url: "https://chess24.com", isLive: false, prize: "$10,000" }
+            ],
+            minor: [
+                { title: "🌏 Asian Continental Chess", date: "June 8-18, 2025 • Almaty, Kazakhstan", url: "https://chessbase.in/news", isLive: false, prize: "$50,000" },
+                { title: "🇪🇺 European Individual Championship", date: "May 20-31, 2025 • Belgrade, Serbia", url: "https://europechess.org", isLive: false, prize: "€100,000" },
+                { title: "🇮🇳 Tata Steel India Rapid", date: "September 5-9, 2025 • Kolkata", url: "https://tatasteelchess.in", isLive: false, prize: "$150,000" }
+            ]
+        };
+        
+        // --- Toast ---
+        window.showMessage = function(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 1800);
+        };
+        
+        function showMessage(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 1800);
+        }
+        
+        // --- Render News ---
+        function renderNewsPanel() {
+            const newsContainer = document.getElementById('news-content');
+            const statsSpan = document.getElementById('news-stats');
+            
+            let html = '<div style="margin-bottom: 10px;"><span style="color:#ffaa44;">🔥 MAJOR EVENTS</span></div>';
+            
+            tournamentDatabase.major.forEach(t => {
+                html += `
+                    <div class="news-item tournament" onclick="window.open('${t.url}', '_blank')">
+                        <div class="news-title">${t.title} ${t.isLive ? '<span class="live-badge">LIVE</span>' : ''}</div>
+                        <div class="news-date">📅 ${t.date} • 💰 ${t.prize}</div>
+                    </div>
+                `;
+            });
+            
+            html += '<div style="margin: 10px 0 8px 0;"><span style="color:#ffaa44;">⚡ ONLINE ARENAS</span></div>';
+            
+            tournamentDatabase.online.forEach(t => {
+                html += `
+                    <div class="news-item" onclick="window.open('${t.url}', '_blank')">
+                        <div class="news-title">${t.title} ${t.isLive ? '<span class="live-badge">LIVE NOW</span>' : ''}</div>
+                        <div class="news-date">⏰ ${t.date} • 🏆 ${t.prize}</div>
+                    </div>
+                `;
+            });
+            
+            html += '<div style="margin: 10px 0 8px 0;"><span style="color:#ffaa44;">🌍 MINOR & REGIONAL</span></div>';
+            
+            tournamentDatabase.minor.forEach(t => {
+                html += `
+                    <div class="news-item" onclick="window.open('${t.url}', '_blank')">
+                        <div class="news-title">${t.title}</div>
+                        <div class="news-date">📅 ${t.date} • 💰 ${t.prize}</div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                <div class="news-item" onclick="window.open('https://www.fide.com/calendar', '_blank')">
+                    <div class="news-title">📅 Full FIDE Calendar (200+ Events)</div>
+                    <div class="news-date">All official rated tournaments worldwide</div>
+                </div>
+                <div class="news-item" onclick="window.open('https://en.chessbase.com/post/tag/tournaments', '_blank')">
+                    <div class="news-title">📰 ChessBase Tournament News</div>
+                    <div class="news-date">Daily updates, results & reports</div>
+                </div>
+            `;
+            
+            newsContainer.innerHTML = html;
+            
+            const totalEvents = tournamentDatabase.major.length + tournamentDatabase.online.length + tournamentDatabase.minor.length;
+            statsSpan.innerHTML = `📊 ${totalEvents} active tournaments • Updated daily`;
+        }
+        
+        window.fetchChessNews = function() {
+            renderNewsPanel();
+            showMessage('✅ Tournaments refreshed!');
+        };
+        
+        // --- Click Handling ---
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        function onClick(event) {
+            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+            mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            const clickableMeshes = [];
+            
+            orbitingPieces.forEach(item => {
+                item.obj.children.forEach(child => {
+                    if (child.isMesh && child.geometry.type !== 'TorusGeometry') {
+                        clickableMeshes.push(child);
+                    }
+                });
+            });
+            clickableMeshes.push(cometCore);
+            
+            const intersects = raycaster.intersectObjects(clickableMeshes);
+            if (intersects.length > 0) {
+                let clickedGroup = intersects[0].object.parent;
+                let isComet = (clickedGroup === cometGroup);
+                
+                if (!isComet) {
+                    while (clickedGroup && !orbitingPieces.find(p => p.obj === clickedGroup)) {
+                        clickedGroup = clickedGroup.parent;
+                    }
+                }
+                
+                if (isComet) {
+                    cometCore.scale.set(1.3, 1.3, 1.3);
+                    setTimeout(() => { cometCore.scale.set(1, 1, 1); }, 200);
+                    showMessage('📰 Opening Live Tournaments Panel');
+                    const panel = document.getElementById('news-panel');
+                    panel.style.display = 'block';
+                    renderNewsPanel();
+                } else {
+                    const pieceData = orbitingPieces.find(p => p.obj === clickedGroup);
+                    if (pieceData) {
+                        const firstMesh = pieceData.obj.children.find(c => c.isMesh && c.geometry.type !== 'TorusGeometry');
+                        if (firstMesh) {
+                            firstMesh.scale.set(1.2, 1.2, 1.2);
+                            setTimeout(() => { firstMesh.scale.set(1, 1, 1); }, 200);
+                        }
+                        showMessage(`🚀 Launching: ${pieceData.label}`);
+                        
+                        setTimeout(() => {
+                            if (pieceData.link === '#history') {
+                                window.open('https://en.wikipedia.org/wiki/History_of_chess', '_blank');
+                            } else if (pieceData.link === '#cognitive') {
+                                window.open('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4285379/', '_blank');
+                            } else {
+                                window.open(pieceData.link, '_blank');
+                            }
+                        }, 250);
+                    }
+                }
+            }
+        }
+        
+        window.addEventListener('click', onClick, false);
+        
+        // --- Animation Loop ---
+        let lastTimestamp = performance.now();
+        
+        function animate() {
+            const now = performance.now();
+            let delta = Math.min(0.05, (now - lastTimestamp) / 1000);
+            lastTimestamp = now;
+            
+            orbitingPieces.forEach(piece => {
+                piece.angle += piece.speed * delta;
+                piece.obj.position.x = Math.cos(piece.angle) * piece.orbitRadius;
+                piece.obj.position.z = Math.sin(piece.angle) * piece.orbitRadius;
+                piece.obj.position.y = piece.yOffset + Math.sin(piece.angle * 1.5) * 0.05;
+                
+                const ring = piece.obj.children.find(c => c.geometry && c.geometry.type === 'TorusGeometry');
+                if (ring) ring.rotation.z = piece.angle;
+            });
+            
+            cometData.angle += cometData.speed * delta;
+            cometGroup.position.x = Math.cos(cometData.angle) * cometData.orbitRadius;
+            cometGroup.position.z = Math.sin(cometData.angle) * cometData.orbitRadius;
+            cometGroup.position.y = cometData.yOffset + Math.sin(cometData.angle * 2) * 0.08;
+            cometRing.rotation.z = cometData.angle;
+            
+            const tailDir = new THREE.Vector3(-Math.cos(cometData.angle), 0, -Math.sin(cometData.angle)).normalize();
+            for (let i = 0; i < tailParticles.length; i++) {
+                const p = tailParticles[i];
+                p.visible = true;
+                const t = i / tailParticles.length;
+                const offset = tailDir.clone().multiplyScalar(-0.4 - t * 1.0);
+                p.position.copy(offset);
+                const scale = 0.07 * (1 - t);
+                p.scale.set(scale, scale, scale);
+                p.material.emissiveIntensity = 0.6 * (1 - t);
+            }
+            
+            coronaRing.rotation.z += 0.015;
+            stars.rotation.y += 0.0003;
+            stars2.rotation.x += 0.0002;
+            
+            controls.update();
+            renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Initialize
+        setTimeout(() => {
+            renderNewsPanel();
+            console.log('✨ Orbit Chess Universe Ready! Click the golden comet for tournaments.');
+        }, 2000);
+    </script>
+</body>
+</html>
