@@ -2,19 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Orbit Chess - The Living Chess Universe</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
             margin: 0;
             overflow: hidden;
             font-family: 'Segoe UI', 'Georgia', 'Times New Roman', serif;
+            touch-action: none;
         }
         
         /* Loading screen */
@@ -59,13 +61,13 @@
             left: 20px;
             color: #ffdd99;
             background: rgba(0,0,0,0.85);
-            padding: 12px 24px;
+            padding: 10px 18px;
             border-radius: 30px;
             backdrop-filter: blur(8px);
             z-index: 100;
             pointer-events: none;
-            font-size: 14px;
-            border-left: 4px solid #ff6600;
+            font-size: 12px;
+            border-left: 3px solid #ff6600;
             font-family: monospace;
         }
         
@@ -75,11 +77,11 @@
             right: 20px;
             color: #ffaa33;
             background: rgba(0,0,0,0.8);
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 12px;
             font-family: 'Georgia', serif;
             font-weight: bold;
-            font-size: 20px;
+            font-size: 16px;
             letter-spacing: 2px;
             z-index: 100;
             pointer-events: none;
@@ -92,17 +94,17 @@
             position: absolute;
             bottom: 20px;
             right: 20px;
-            width: 350px;
-            max-height: 55vh;
-            background: rgba(0,0,0,0.92);
+            width: 320px;
+            max-height: 50vh;
+            background: rgba(0,0,0,0.95);
             backdrop-filter: blur(12px);
             border-radius: 16px;
             border-left: 3px solid #ff6600;
             color: #eee;
-            padding: 15px;
+            padding: 12px;
             z-index: 100;
             font-family: monospace;
-            font-size: 12px;
+            font-size: 11px;
             pointer-events: auto;
             transition: 0.3s;
             box-shadow: 0 4px 20px rgba(0,0,0,0.6);
@@ -111,7 +113,7 @@
         }
         
         #news-panel::-webkit-scrollbar {
-            width: 5px;
+            width: 4px;
         }
         
         #news-panel::-webkit-scrollbar-track {
@@ -125,35 +127,35 @@
         #news-panel h3 {
             margin: 0 0 8px 0;
             color: #ffaa44;
-            font-size: 16px;
+            font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         
         .news-item {
-            padding: 10px 8px;
+            padding: 8px 6px;
             border-bottom: 1px solid rgba(255,170,68,0.2);
             cursor: pointer;
             transition: 0.2s;
-            border-radius: 8px;
+            border-radius: 6px;
         }
         
-        .news-item:hover {
-            background: rgba(255,170,68,0.15);
-            transform: translateX(4px);
+        .news-item:active {
+            background: rgba(255,170,68,0.2);
+            transform: scale(0.98);
         }
         
         .news-title {
             font-weight: bold;
             color: #ffcc88;
-            font-size: 13px;
+            font-size: 12px;
         }
         
         .news-date {
-            font-size: 10px;
+            font-size: 9px;
             color: #aaa;
-            margin-top: 4px;
+            margin-top: 3px;
         }
         
         .tournament {
@@ -163,10 +165,10 @@
         .live-badge {
             background: #ff3300;
             color: white;
-            font-size: 9px;
-            padding: 2px 8px;
+            font-size: 8px;
+            padding: 2px 6px;
             border-radius: 20px;
-            margin-left: 8px;
+            margin-left: 6px;
             display: inline-block;
             animation: pulse 1.5s infinite;
         }
@@ -183,9 +185,9 @@
             text-align: left;
             color: rgba(255,255,255,0.6);
             background: rgba(0,0,0,0.5);
-            padding: 8px 15px;
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: 10px;
             z-index: 100;
             pointer-events: none;
             font-family: monospace;
@@ -198,9 +200,9 @@
             transform: translateX(-50%);
             background: rgba(0,0,0,0.95);
             color: #ffaa44;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 40px;
-            font-size: 14px;
+            font-size: 12px;
             z-index: 200;
             pointer-events: none;
             transition: opacity 0.3s;
@@ -211,18 +213,17 @@
         }
         
         .refresh-status {
-            font-size: 10px;
+            font-size: 9px;
             text-align: center;
-            margin-top: 12px;
-            padding-top: 8px;
+            margin-top: 10px;
+            padding-top: 6px;
             color: #ffaa66;
             cursor: pointer;
             border-top: 1px solid rgba(255,170,68,0.3);
         }
         
-        .refresh-status:hover {
-            text-decoration: underline;
-            color: #ffcc88;
+        .refresh-status:active {
+            opacity: 0.7;
         }
         
         .close-news {
@@ -231,23 +232,23 @@
             background: none;
             border: none;
             color: #ffaa44;
-            font-size: 18px;
+            font-size: 16px;
             transition: 0.2s;
+            padding: 0 4px;
         }
         
-        .close-news:hover {
-            color: #ffcc88;
+        .close-news:active {
             transform: scale(1.1);
         }
         
         .news-stats {
-            font-size: 9px;
+            font-size: 8px;
             color: #ffaa66;
             text-align: center;
-            margin-top: 8px;
+            margin-top: 6px;
         }
         
-        /* ========== FOOTER STYLES ========== */
+        /* Footer */
         .footer {
             position: absolute;
             bottom: 0;
@@ -256,7 +257,7 @@
             background: linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(10,10,30,0.95) 100%);
             backdrop-filter: blur(10px);
             border-top: 1px solid rgba(255,170,68,0.3);
-            padding: 15px 30px;
+            padding: 12px 20px;
             z-index: 99;
             font-family: 'Segoe UI', monospace;
             transform: translateY(100%);
@@ -275,17 +276,17 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 12px;
         }
         
         .footer-brand {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
         
         .footer-brand-icon {
-            font-size: 28px;
+            font-size: 24px;
             animation: rotateSlow 8s linear infinite;
         }
         
@@ -294,79 +295,72 @@
             to { transform: rotate(360deg); }
         }
         
-        .footer-brand-text {
-            color: #ffdd99;
-        }
-        
         .footer-brand-text h4 {
-            font-size: 16px;
+            font-size: 14px;
             margin: 0;
             color: #ffaa44;
         }
         
         .footer-brand-text p {
-            font-size: 10px;
-            margin: 4px 0 0;
+            font-size: 9px;
+            margin: 2px 0 0;
             color: #aaa;
         }
         
         .footer-links {
             display: flex;
-            gap: 25px;
+            gap: 15px;
             flex-wrap: wrap;
         }
         
         .footer-links a {
             color: #ccc;
             text-decoration: none;
-            font-size: 12px;
-            transition: 0.3s;
+            font-size: 11px;
+            transition: 0.2s;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
         
-        .footer-links a:hover {
+        .footer-links a:active {
             color: #ffaa44;
-            transform: translateY(-2px);
+            transform: scale(0.95);
         }
         
         .social-icons {
             display: flex;
-            gap: 20px;
+            gap: 12px;
         }
         
         .social-icon {
-            width: 38px;
-            height: 38px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             background: rgba(255,170,68,0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.3s;
+            transition: 0.2s;
             cursor: pointer;
             border: 1px solid rgba(255,170,68,0.3);
-            font-size: 20px;
+            font-size: 18px;
             text-decoration: none;
             color: #ffaa66;
         }
         
-        .social-icon:hover {
+        .social-icon:active {
             background: rgba(255,170,68,0.3);
-            transform: translateY(-3px) scale(1.05);
-            border-color: #ffaa44;
-            color: #ffcc88;
-            box-shadow: 0 0 15px rgba(255,170,68,0.3);
+            transform: scale(0.95);
         }
         
         .footer-copyright {
-            font-size: 10px;
+            font-size: 9px;
             color: #666;
             text-align: center;
             border-top: 1px solid rgba(255,170,68,0.2);
-            padding-top: 12px;
-            margin-top: 12px;
+            padding-top: 10px;
+            margin-top: 10px;
         }
         
         .footer-toggle {
@@ -377,49 +371,36 @@
             background: rgba(0,0,0,0.8);
             border: 1px solid #ffaa44;
             border-bottom: none;
-            border-radius: 12px 12px 0 0;
-            padding: 6px 20px;
+            border-radius: 10px 10px 0 0;
+            padding: 5px 16px;
             cursor: pointer;
             z-index: 100;
-            font-size: 14px;
+            font-size: 11px;
             color: #ffaa44;
-            transition: 0.3s;
+            transition: 0.2s;
             backdrop-filter: blur(5px);
         }
         
-        .footer-toggle:hover {
+        .footer-toggle:active {
             background: rgba(255,170,68,0.2);
-            padding-bottom: 8px;
-        }
-        
-        @media (max-width: 800px) {
-            .footer-content {
-                flex-direction: column;
-                text-align: center;
-                gap: 12px;
-            }
-            .footer-links {
-                justify-content: center;
-            }
-            .social-icons {
-                justify-content: center;
-            }
-            .footer {
-                padding: 12px 20px;
-            }
-            #news-panel {
-                width: 280px;
-                max-height: 50vh;
-                bottom: 60px;
-            }
         }
         
         @media (max-width: 700px) {
-            #news-panel { width: 280px; font-size: 10px; padding: 10px; bottom: 60px; right: 10px; max-height: 50vh; }
-            #title { font-size: 14px; top: 10px; right: 10px; }
-            #info { font-size: 10px; top: 10px; left: 10px; }
-            .toast { font-size: 11px; bottom: 80px; white-space: nowrap; }
-            .footer-toggle { font-size: 10px; padding: 4px 16px; }
+            #news-panel { width: 270px; font-size: 10px; padding: 10px; bottom: 55px; right: 10px; max-height: 45vh; }
+            #title { font-size: 13px; top: 10px; right: 10px; padding: 6px 12px; }
+            #info { font-size: 9px; top: 10px; left: 10px; padding: 8px 14px; }
+            .toast { font-size: 11px; bottom: 70px; white-space: nowrap; }
+            .footer-toggle { font-size: 9px; padding: 4px 14px; }
+            .footer { padding: 10px 15px; }
+            .social-icon { width: 30px; height: 30px; font-size: 16px; }
+            .footer-links a { font-size: 10px; }
+            #instruction { font-size: 8px; bottom: 12px; left: 12px; }
+        }
+        
+        @media (max-width: 480px) {
+            .footer-content { flex-direction: column; gap: 8px; }
+            .footer-links { justify-content: center; }
+            .social-icons { justify-content: center; }
         }
     </style>
 </head>
@@ -428,30 +409,30 @@
         <div class="loader-content">
             <div class="loader-spinner"></div>
             <div>♔ ORBIT CHESS ♚</div>
-            <div style="font-size: 12px; margin-top: 10px;">Loading the chess universe...</div>
+            <div style="font-size: 11px; margin-top: 8px;">Loading the chess universe...</div>
         </div>
     </div>
     
     <div id="info">
-        🎯 <strong>CLICK ORBITING PIECES</strong> → Games & Articles<br>
+        🎯 <strong>TAP ORBITING PIECES</strong> → Games & Articles<br>
         📰 <strong>GOLDEN COMET</strong> → Live Tournaments
     </div>
     <div id="title">
         ♔ ORBIT CHESS ♚
     </div>
     <div id="instruction">
-        🖱️ Drag to orbit • Scroll to zoom • Click pieces to explore<br>
-        🌟 <strong>Click the golden comet</strong> for live tournament news
+        🖱️ Drag to orbit • Pinch to zoom • Tap pieces to explore<br>
+        🌟 <strong>Tap the golden comet</strong> for live tournament news
     </div>
     
     <div id="news-panel" style="display: block;">
         <button class="close-news" onclick="document.getElementById('news-panel').style.display='none'">✕</button>
         <h3>📰 LIVE CHESS TOURNAMENTS</h3>
         <div id="news-content">
-            <div style="text-align: center; padding: 20px;">🔄 Loading tournaments...</div>
+            <div style="text-align: center; padding: 15px;">🔄 Loading tournaments...</div>
         </div>
         <div class="refresh-status" onclick="fetchChessNews()">
-            🔄 Click to refresh news
+            🔄 Tap to refresh news
         </div>
         <div class="news-stats" id="news-stats"></div>
     </div>
@@ -522,7 +503,19 @@
         const footerToggle = document.getElementById('footerToggle');
         let footerVisible = false;
         
-        footerToggle.addEventListener('click', () => {
+        footerToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            footerVisible = !footerVisible;
+            if (footerVisible) {
+                footer.classList.add('visible');
+                footerToggle.innerHTML = '🔗 CONNECT & FOLLOW ▼';
+            } else {
+                footer.classList.remove('visible');
+                footerToggle.innerHTML = '🔗 CONNECT & FOLLOW ▲';
+            }
+        });
+        footerToggle.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
             footerVisible = !footerVisible;
             if (footerVisible) {
                 footer.classList.add('visible');
@@ -533,7 +526,7 @@
             }
         });
         
-        // Auto-show footer after 3 seconds on first load
+        // Auto-show footer after 3 seconds
         setTimeout(() => {
             if (!footerVisible) {
                 footerVisible = true;
@@ -576,7 +569,7 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // Controls
+        // Controls with touch support
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
@@ -584,6 +577,8 @@
         controls.enableZoom = true;
         controls.zoomSpeed = 1.0;
         controls.rotateSpeed = 0.8;
+        controls.touchRotate = true;
+        controls.touchZoom = true;
         controls.target.set(0, 0, 0);
 
         // --- Lighting ---
@@ -652,12 +647,12 @@
         const centerDiv = document.createElement('div');
         centerDiv.textContent = '⚡ ORBIT CHESS ⚡';
         centerDiv.style.color = '#ffcc66';
-        centerDiv.style.fontSize = '18px';
+        centerDiv.style.fontSize = '16px';
         centerDiv.style.fontWeight = 'bold';
         centerDiv.style.fontFamily = 'Georgia, serif';
         centerDiv.style.textShadow = '0 0 12px orange';
         centerDiv.style.background = 'rgba(0,0,0,0.6)';
-        centerDiv.style.padding = '6px 18px';
+        centerDiv.style.padding = '5px 14px';
         centerDiv.style.borderRadius = '40px';
         centerDiv.style.border = '1px solid #ffaa44';
         const centerLabel = new CSS2DObject(centerDiv);
@@ -758,17 +753,17 @@
         scene.add(cometGroup);
         
         const newsDiv = document.createElement('div');
-        newsDiv.innerHTML = '📰 <strong>LIVE TOURNAMENTS</strong><br><span style="font-size:9px;">Click for updates →</span>';
+        newsDiv.innerHTML = '📰 <strong>LIVE TOURNAMENTS</strong><br><span style="font-size:8px;">Tap for updates →</span>';
         newsDiv.style.color = '#ffaa44';
         newsDiv.style.background = 'rgba(0,0,0,0.85)';
-        newsDiv.style.padding = '6px 14px';
+        newsDiv.style.padding = '5px 12px';
         newsDiv.style.borderRadius = '30px';
         newsDiv.style.border = '2px solid #ff6600';
-        newsDiv.style.fontSize = '11px';
+        newsDiv.style.fontSize = '10px';
         newsDiv.style.whiteSpace = 'nowrap';
         newsDiv.style.fontWeight = 'bold';
         const newsLabel = new CSS2DObject(newsDiv);
-        newsLabel.position.set(0, 1.1, 0);
+        newsLabel.position.set(0, 1.0, 0);
         cometGroup.add(newsLabel);
         
         // --- Orbiting Pieces ---
@@ -793,16 +788,16 @@
             pieceGroup.add(ring);
             
             const div = document.createElement('div');
-            div.innerHTML = `<strong>${data.icon} ${data.label}</strong><br><span style="font-size:9px;">${data.desc}</span>`;
+            div.innerHTML = `<strong>${data.icon} ${data.label}</strong><br><span style="font-size:8px;">${data.desc}</span>`;
             div.style.color = '#ffeedd';
-            div.style.fontSize = '11px';
+            div.style.fontSize = '10px';
             div.style.textAlign = 'center';
             div.style.background = 'rgba(0,0,0,0.7)';
-            div.style.padding = '5px 12px';
+            div.style.padding = '4px 10px';
             div.style.borderRadius = '20px';
             div.style.border = `1px solid ${new THREE.Color(data.color).getStyle()}`;
             const labelObj = new CSS2DObject(div);
-            labelObj.position.set(0, 1.0, 0);
+            labelObj.position.set(0, 0.95, 0);
             pieceGroup.add(labelObj);
             
             scene.add(pieceGroup);
@@ -829,19 +824,19 @@
         // --- Tournament Database ---
         const tournamentDatabase = {
             major: [
-                { title: "🏆 FIDE World Championship 2025", date: "November 20 - December 15, 2025 • Singapore", url: "https://worldchess.com", isLive: false, prize: "€2,000,000" },
-                { title: "👑 FIDE Candidates Tournament 2025", date: "April 1-25, 2025 • Toronto, Canada", url: "https://candidates.fide.com", isLive: false, prize: "€500,000" },
-                { title: "🇺🇸 US Chess Championship", date: "October 5-18, 2025 • St. Louis", url: "https://uschesschamps.com", isLive: false, prize: "$300,000" }
+                { title: "🏆 FIDE World Championship 2025", date: "Nov 20 - Dec 15, 2025 • Singapore", url: "https://worldchess.com", isLive: false, prize: "€2M" },
+                { title: "👑 FIDE Candidates 2025", date: "Apr 1-25, 2025 • Toronto", url: "https://candidates.fide.com", isLive: false, prize: "€500k" },
+                { title: "🇺🇸 US Chess Championship", date: "Oct 5-18, 2025 • St. Louis", url: "https://uschesschamps.com", isLive: false, prize: "$300k" }
             ],
             online: [
-                { title: "⚡ Lichess Elite Arena", date: "Every Saturday • 15:00 UTC", url: "https://lichess.org/tournament", isLive: true, prize: "Trophies" },
-                { title: "🎮 Chess.com Blitz Battle", date: "Daily • Various times", url: "https://chess.com/tournaments", isLive: true, prize: "Cash & Prizes" },
-                { title: "🌐 Chess24 Legends League", date: "Weekly • Sundays 18:00 CET", url: "https://chess24.com", isLive: false, prize: "$10,000" }
+                { title: "⚡ Lichess Elite Arena", date: "Every Sat • 15:00 UTC", url: "https://lichess.org/tournament", isLive: true, prize: "Trophies" },
+                { title: "🎮 Chess.com Blitz Battle", date: "Daily • Various times", url: "https://chess.com/tournaments", isLive: true, prize: "Cash" },
+                { title: "🌐 Chess24 Legends League", date: "Sundays • 18:00 CET", url: "https://chess24.com", isLive: false, prize: "$10k" }
             ],
             minor: [
-                { title: "🌏 Asian Continental Chess", date: "June 8-18, 2025 • Almaty, Kazakhstan", url: "https://chessbase.in/news", isLive: false, prize: "$50,000" },
-                { title: "🇪🇺 European Individual Championship", date: "May 20-31, 2025 • Belgrade, Serbia", url: "https://europechess.org", isLive: false, prize: "€100,000" },
-                { title: "🇮🇳 Tata Steel India Rapid", date: "September 5-9, 2025 • Kolkata", url: "https://tatasteelchess.in", isLive: false, prize: "$150,000" }
+                { title: "🌏 Asian Continental", date: "Jun 8-18, 2025 • Almaty", url: "https://chessbase.in/news", isLive: false, prize: "$50k" },
+                { title: "🇪🇺 European Championship", date: "May 20-31, 2025 • Belgrade", url: "https://europechess.org", isLive: false, prize: "€100k" },
+                { title: "🇮🇳 Tata Steel India", date: "Sep 5-9, 2025 • Kolkata", url: "https://tatasteelchess.in", isLive: false, prize: "$150k" }
             ]
         };
         
@@ -865,33 +860,33 @@
             const newsContainer = document.getElementById('news-content');
             const statsSpan = document.getElementById('news-stats');
             
-            let html = '<div style="margin-bottom: 10px;"><span style="color:#ffaa44;">🔥 MAJOR EVENTS</span></div>';
+            let html = '<div style="margin-bottom: 8px;"><span style="color:#ffaa44;">🔥 MAJOR EVENTS</span></div>';
             
             tournamentDatabase.major.forEach(t => {
                 html += `
-                    <div class="news-item tournament" onclick="window.open('${t.url}', '_blank')">
+                    <div class="news-item tournament" onclick="window.open('${t.url}', '_blank')" ontouchstart="window.open('${t.url}', '_blank')">
                         <div class="news-title">${t.title} ${t.isLive ? '<span class="live-badge">LIVE</span>' : ''}</div>
                         <div class="news-date">📅 ${t.date} • 💰 ${t.prize}</div>
                     </div>
                 `;
             });
             
-            html += '<div style="margin: 10px 0 8px 0;"><span style="color:#ffaa44;">⚡ ONLINE ARENAS</span></div>';
+            html += '<div style="margin: 8px 0 6px 0;"><span style="color:#ffaa44;">⚡ ONLINE ARENAS</span></div>';
             
             tournamentDatabase.online.forEach(t => {
                 html += `
-                    <div class="news-item" onclick="window.open('${t.url}', '_blank')">
+                    <div class="news-item" onclick="window.open('${t.url}', '_blank')" ontouchstart="window.open('${t.url}', '_blank')">
                         <div class="news-title">${t.title} ${t.isLive ? '<span class="live-badge">LIVE NOW</span>' : ''}</div>
                         <div class="news-date">⏰ ${t.date} • 🏆 ${t.prize}</div>
                     </div>
                 `;
             });
             
-            html += '<div style="margin: 10px 0 8px 0;"><span style="color:#ffaa44;">🌍 MINOR & REGIONAL</span></div>';
+            html += '<div style="margin: 8px 0 6px 0;"><span style="color:#ffaa44;">🌍 MINOR & REGIONAL</span></div>';
             
             tournamentDatabase.minor.forEach(t => {
                 html += `
-                    <div class="news-item" onclick="window.open('${t.url}', '_blank')">
+                    <div class="news-item" onclick="window.open('${t.url}', '_blank')" ontouchstart="window.open('${t.url}', '_blank')">
                         <div class="news-title">${t.title}</div>
                         <div class="news-date">📅 ${t.date} • 💰 ${t.prize}</div>
                     </div>
@@ -899,11 +894,11 @@
             });
             
             html += `
-                <div class="news-item" onclick="window.open('https://www.fide.com/calendar', '_blank')">
+                <div class="news-item" onclick="window.open('https://www.fide.com/calendar', '_blank')" ontouchstart="window.open('https://www.fide.com/calendar', '_blank')">
                     <div class="news-title">📅 Full FIDE Calendar (200+ Events)</div>
                     <div class="news-date">All official rated tournaments worldwide</div>
                 </div>
-                <div class="news-item" onclick="window.open('https://en.chessbase.com/post/tag/tournaments', '_blank')">
+                <div class="news-item" onclick="window.open('https://en.chessbase.com/post/tag/tournaments', '_blank')" ontouchstart="window.open('https://en.chessbase.com/post/tag/tournaments', '_blank')">
                     <div class="news-title">📰 ChessBase Tournament News</div>
                     <div class="news-date">Daily updates, results & reports</div>
                 </div>
@@ -920,17 +915,35 @@
             showMessage('✅ Tournaments refreshed!');
         };
         
-        // --- Click Handling ---
+        // --- Mobile-friendly Click Handling (works for both mouse AND touch) ---
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         
-        function onClick(event) {
-            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-            mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+        // Unified handler for both click and touch events
+        function handleInteraction(event) {
+            // Prevent default to avoid double-firing on mobile
+            event.preventDefault();
+            
+            // Get coordinates - works for both mouse and touch
+            let clientX, clientY;
+            if (event.touches) {
+                // Touch event
+                clientX = event.touches[0].clientX;
+                clientY = event.touches[0].clientY;
+            } else {
+                // Mouse event
+                clientX = event.clientX;
+                clientY = event.clientY;
+            }
+            
+            // Calculate normalized device coordinates (-1 to +1)
+            mouse.x = (clientX / renderer.domElement.clientWidth) * 2 - 1;
+            mouse.y = -(clientY / renderer.domElement.clientHeight) * 2 + 1;
             
             raycaster.setFromCamera(mouse, camera);
-            const clickableMeshes = [];
             
+            // Collect all clickable meshes
+            const clickableMeshes = [];
             orbitingPieces.forEach(item => {
                 item.obj.children.forEach(child => {
                     if (child.isMesh && child.geometry.type !== 'TorusGeometry') {
@@ -941,6 +954,7 @@
             clickableMeshes.push(cometCore);
             
             const intersects = raycaster.intersectObjects(clickableMeshes);
+            
             if (intersects.length > 0) {
                 let clickedGroup = intersects[0].object.parent;
                 let isComet = (clickedGroup === cometGroup);
@@ -952,6 +966,7 @@
                 }
                 
                 if (isComet) {
+                    // Comet animation
                     cometCore.scale.set(1.3, 1.3, 1.3);
                     setTimeout(() => { cometCore.scale.set(1, 1, 1); }, 200);
                     showMessage('📰 Opening Live Tournaments Panel');
@@ -961,6 +976,7 @@
                 } else {
                     const pieceData = orbitingPieces.find(p => p.obj === clickedGroup);
                     if (pieceData) {
+                        // Visual feedback
                         const firstMesh = pieceData.obj.children.find(c => c.isMesh && c.geometry.type !== 'TorusGeometry');
                         if (firstMesh) {
                             firstMesh.scale.set(1.2, 1.2, 1.2);
@@ -982,7 +998,9 @@
             }
         }
         
-        window.addEventListener('click', onClick, false);
+        // Add both mouse and touch event listeners for full mobile support
+        window.addEventListener('click', handleInteraction);
+        window.addEventListener('touchstart', handleInteraction, { passive: false });
         
         // --- Animation Loop ---
         let lastTimestamp = performance.now();
@@ -1042,7 +1060,7 @@
         // Initialize
         setTimeout(() => {
             renderNewsPanel();
-            console.log('✨ Orbit Chess Universe Ready! Click the golden comet for tournaments.');
+            console.log('✨ Orbit Chess Universe Ready! Tap any piece or comet.');
         }, 2000);
     </script>
 </body>
