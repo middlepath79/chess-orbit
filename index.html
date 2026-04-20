@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Orbit Chess - The Living Chess Universe</title>
+    <title>Orbit Chess - Real Chess Pieces Universe</title>
     <style>
         * {
             margin: 0;
@@ -89,20 +89,20 @@
             border: 1px solid #ffaa33;
         }
         
-        /* News Panel */
+        /* News Panel - FIXED CLOSE BUTTON */
         #news-panel {
             position: absolute;
             bottom: 20px;
             right: 20px;
             width: 320px;
-            max-height: 50vh;
+            max-height: 55vh;
             background: rgba(0,0,0,0.95);
             backdrop-filter: blur(12px);
             border-radius: 16px;
             border-left: 3px solid #ff6600;
             color: #eee;
-            padding: 12px;
-            z-index: 100;
+            padding: 15px;
+            z-index: 1000;
             font-family: monospace;
             font-size: 11px;
             pointer-events: auto;
@@ -110,6 +110,10 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.6);
             overflow-y: auto;
             scrollbar-width: thin;
+        }
+        
+        #news-panel.hidden {
+            display: none !important;
         }
         
         #news-panel::-webkit-scrollbar {
@@ -124,13 +128,38 @@
             background: #ffaa44;
         }
         
-        #news-panel h3 {
-            margin: 0 0 8px 0;
+        .news-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .news-header h3 {
+            margin: 0;
             color: #ffaa44;
             font-size: 14px;
+        }
+        
+        .close-news {
+            background: rgba(255,68,68,0.2);
+            border: 1px solid #ff4444;
+            color: #ff8888;
+            cursor: pointer;
+            font-size: 18px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        
+        .close-news:hover, .close-news:active {
+            background: rgba(255,68,68,0.5);
+            transform: scale(1.1);
+            color: #ffaaaa;
         }
         
         .news-item {
@@ -203,7 +232,7 @@
             padding: 10px 20px;
             border-radius: 40px;
             font-size: 12px;
-            z-index: 200;
+            z-index: 2000;
             pointer-events: none;
             transition: opacity 0.3s;
             font-family: monospace;
@@ -224,21 +253,6 @@
         
         .refresh-status:active {
             opacity: 0.7;
-        }
-        
-        .close-news {
-            float: right;
-            cursor: pointer;
-            background: none;
-            border: none;
-            color: #ffaa44;
-            font-size: 16px;
-            transition: 0.2s;
-            padding: 0 4px;
-        }
-        
-        .close-news:active {
-            transform: scale(1.1);
         }
         
         .news-stats {
@@ -386,21 +400,13 @@
         }
         
         @media (max-width: 700px) {
-            #news-panel { width: 270px; font-size: 10px; padding: 10px; bottom: 55px; right: 10px; max-height: 45vh; }
+            #news-panel { width: 280px; font-size: 10px; padding: 12px; bottom: 55px; right: 10px; max-height: 50vh; }
             #title { font-size: 13px; top: 10px; right: 10px; padding: 6px 12px; }
             #info { font-size: 9px; top: 10px; left: 10px; padding: 8px 14px; }
             .toast { font-size: 11px; bottom: 70px; white-space: nowrap; }
             .footer-toggle { font-size: 9px; padding: 4px 14px; }
             .footer { padding: 10px 15px; }
             .social-icon { width: 30px; height: 30px; font-size: 16px; }
-            .footer-links a { font-size: 10px; }
-            #instruction { font-size: 8px; bottom: 12px; left: 12px; }
-        }
-        
-        @media (max-width: 480px) {
-            .footer-content { flex-direction: column; gap: 8px; }
-            .footer-links { justify-content: center; }
-            .social-icons { justify-content: center; }
         }
     </style>
 </head>
@@ -425,13 +431,15 @@
         🌟 <strong>Tap the golden comet</strong> for live tournament news
     </div>
     
-    <div id="news-panel" style="display: block;">
-        <button class="close-news" onclick="document.getElementById('news-panel').style.display='none'">✕</button>
-        <h3>📰 LIVE CHESS TOURNAMENTS</h3>
+    <div id="news-panel">
+        <div class="news-header">
+            <h3>📰 LIVE CHESS TOURNAMENTS</h3>
+            <button class="close-news" id="closeNewsBtn">✕</button>
+        </div>
         <div id="news-content">
             <div style="text-align: center; padding: 15px;">🔄 Loading tournaments...</div>
         </div>
-        <div class="refresh-status" onclick="fetchChessNews()">
+        <div class="refresh-status" id="refreshNewsBtn">
             🔄 Tap to refresh news
         </div>
         <div class="news-stats" id="news-stats"></div>
@@ -454,27 +462,19 @@
             </div>
             
             <div class="footer-links">
-                <a href="#" onclick="showMessage('📧 Contact: hello@orbitchess.com'); return false;">
-                    📧 Contact
-                </a>
-                <a href="#" onclick="showMessage('📝 Blog coming soon!'); return false;">
-                    📝 Blog
-                </a>
-                <a href="#" onclick="window.open('https://github.com', '_blank');">
-                    💻 GitHub
-                </a>
-                <a href="#" onclick="showMessage('✨ API Status: All systems operational'); return false;">
-                    🚀 API Status
-                </a>
+                <a href="#" id="contactLink">📧 Contact</a>
+                <a href="#" id="blogLink">📝 Blog</a>
+                <a href="#" id="githubLink">💻 GitHub</a>
+                <a href="#" id="apiLink">🚀 API Status</a>
             </div>
             
             <div class="social-icons">
-                <a href="#" class="social-icon" onclick="window.open('https://twitter.com/chess', '_blank'); return false;">🐦</a>
-                <a href="#" class="social-icon" onclick="window.open('https://github.com/lichess-org', '_blank'); return false;">🐙</a>
-                <a href="#" class="social-icon" onclick="window.open('https://discord.gg/chess', '_blank'); return false;">💬</a>
-                <a href="#" class="social-icon" onclick="window.open('https://www.twitch.tv/directory/game/Chess', '_blank'); return false;">📺</a>
-                <a href="#" class="social-icon" onclick="window.open('https://www.reddit.com/r/chess/', '_blank'); return false;">🔴</a>
-                <a href="#" class="social-icon" onclick="window.open('https://www.instagram.com/chess/', '_blank'); return false;">📷</a>
+                <a href="#" class="social-icon" id="twitterLink">🐦</a>
+                <a href="#" class="social-icon" id="githubSocialLink">🐙</a>
+                <a href="#" class="social-icon" id="discordLink">💬</a>
+                <a href="#" class="social-icon" id="twitchLink">📺</a>
+                <a href="#" class="social-icon" id="redditLink">🔴</a>
+                <a href="#" class="social-icon" id="instagramLink">📷</a>
             </div>
         </div>
         <div class="footer-copyright">
@@ -498,6 +498,26 @@
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
+        // --- DOM Elements ---
+        const newsPanel = document.getElementById('news-panel');
+        const closeNewsBtn = document.getElementById('closeNewsBtn');
+        const refreshNewsBtn = document.getElementById('refreshNewsBtn');
+        
+        // --- FIXED: Close button functionality ---
+        closeNewsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            newsPanel.classList.add('hidden');
+            showMessage('📰 News panel closed');
+        });
+        closeNewsBtn.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+            newsPanel.classList.add('hidden');
+            showMessage('📰 News panel closed');
+        });
+        
+        refreshNewsBtn.addEventListener('click', () => fetchChessNews());
+        refreshNewsBtn.addEventListener('touchstart', () => fetchChessNews());
+        
         // --- Footer Toggle Logic ---
         const footer = document.getElementById('footer');
         const footerToggle = document.getElementById('footerToggle');
@@ -526,6 +546,18 @@
             }
         });
         
+        // Footer link handlers
+        document.getElementById('contactLink').onclick = () => showMessage('📧 Contact: hello@orbitchess.com');
+        document.getElementById('blogLink').onclick = () => showMessage('📝 Blog coming soon!');
+        document.getElementById('githubLink').onclick = () => window.open('https://github.com', '_blank');
+        document.getElementById('apiLink').onclick = () => showMessage('✨ API Status: All systems operational');
+        document.getElementById('twitterLink').onclick = () => window.open('https://twitter.com/chess', '_blank');
+        document.getElementById('githubSocialLink').onclick = () => window.open('https://github.com/lichess-org', '_blank');
+        document.getElementById('discordLink').onclick = () => window.open('https://discord.gg/chess', '_blank');
+        document.getElementById('twitchLink').onclick = () => window.open('https://www.twitch.tv/directory/game/Chess', '_blank');
+        document.getElementById('redditLink').onclick = () => window.open('https://www.reddit.com/r/chess/', '_blank');
+        document.getElementById('instagramLink').onclick = () => window.open('https://www.instagram.com/chess/', '_blank');
+        
         // Auto-show footer after 3 seconds
         setTimeout(() => {
             if (!footerVisible) {
@@ -549,10 +581,10 @@
         // --- Setup Scene ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x030614);
-        scene.fog = new THREE.FogExp2(0x030614, 0.0004);
+        scene.fog = new THREE.FogExp2(0x030614, 0.0003);
 
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 3.5, 14);
+        camera.position.set(0, 4, 15);
         camera.lookAt(0, 0, 0);
 
         const labelRenderer = new CSS2DRenderer();
@@ -586,7 +618,7 @@
         scene.add(ambientLight);
         
         const mainLight = new THREE.DirectionalLight(0xffeedd, 1.2);
-        mainLight.position.set(5, 8, 6);
+        mainLight.position.set(5, 10, 7);
         mainLight.castShadow = true;
         scene.add(mainLight);
         
@@ -598,12 +630,16 @@
         backLight.position.set(-3, 2, -5);
         scene.add(backLight);
         
+        const rimLight = new THREE.PointLight(0xff8844, 0.6);
+        rimLight.position.set(2, 3, -4);
+        scene.add(rimLight);
+        
         const hemiLight = new THREE.HemisphereLight(0x445566, 0x221100, 0.5);
         scene.add(hemiLight);
 
         // --- Starfield ---
         const starGeometry = new THREE.BufferGeometry();
-        const starCount = 3000;
+        const starCount = 4000;
         const starPositions = new Float32Array(starCount * 3);
         for (let i = 0; i < starCount; i++) {
             starPositions[i*3] = (Math.random() - 0.5) * 2000;
@@ -611,34 +647,34 @@
             starPositions[i*3+2] = (Math.random() - 0.5) * 800 - 300;
         }
         starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.18, transparent: true, opacity: 0.7 });
+        const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.15, transparent: true, opacity: 0.7 });
         const stars = new THREE.Points(starGeometry, starMaterial);
         scene.add(stars);
         
         const starGeo2 = new THREE.BufferGeometry();
-        const starPos2 = new Float32Array(1500 * 3);
-        for (let i = 0; i < 1500; i++) {
+        const starPos2 = new Float32Array(2000 * 3);
+        for (let i = 0; i < 2000; i++) {
             starPos2[i*3] = (Math.random() - 0.5) * 2500;
             starPos2[i*3+1] = (Math.random() - 0.5) * 1200;
             starPos2[i*3+2] = (Math.random() - 0.5) * 1000 - 500;
         }
         starGeo2.setAttribute('position', new THREE.BufferAttribute(starPos2, 3));
-        const starMat2 = new THREE.PointsMaterial({ color: 0xaaccff, size: 0.1, transparent: true });
+        const starMat2 = new THREE.PointsMaterial({ color: 0xaaccff, size: 0.08, transparent: true });
         const stars2 = new THREE.Points(starGeo2, starMat2);
         scene.add(stars2);
 
         // --- Central Sun ---
-        const sunMat = new THREE.MeshStandardMaterial({ color: 0xdd9933, emissive: 0x552200, emissiveIntensity: 0.7, metalness: 0.2 });
-        const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(1.0, 64, 64), sunMat);
+        const sunMat = new THREE.MeshStandardMaterial({ color: 0xdd9933, emissive: 0x552200, emissiveIntensity: 0.8, metalness: 0.1 });
+        const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(1.1, 64, 64), sunMat);
         sunMesh.castShadow = true;
         scene.add(sunMesh);
         
-        const coreGlow = new THREE.PointLight(0xff8844, 1.0, 18);
+        const coreGlow = new THREE.PointLight(0xff8844, 1.2, 20);
         coreGlow.position.set(0, 0, 0);
         scene.add(coreGlow);
         
         const coronaRing = new THREE.Mesh(
-            new THREE.TorusGeometry(1.3, 0.05, 64, 200),
+            new THREE.TorusGeometry(1.4, 0.06, 64, 200),
             new THREE.MeshStandardMaterial({ color: 0xffaa55, emissive: 0x442200 })
         );
         coronaRing.rotation.x = Math.PI / 2;
@@ -656,86 +692,134 @@
         centerDiv.style.borderRadius = '40px';
         centerDiv.style.border = '1px solid #ffaa44';
         const centerLabel = new CSS2DObject(centerDiv);
-        centerLabel.position.set(0, 1.2, 0);
+        centerLabel.position.set(0, 1.3, 0);
         scene.add(centerLabel);
 
-        // --- Chess Piece Factory ---
-        function createRealisticPiece(type, colorHex, metalnessVal = 0.85) {
+        // --- REALISTIC CHESS PIECES (Full Stack Animation) ---
+        function createDetailedPiece(type, colorHex, metalnessVal = 0.85, roughnessVal = 0.2) {
             const group = new THREE.Group();
-            const material = new THREE.MeshStandardMaterial({ color: colorHex, metalness: metalnessVal, roughness: 0.25 });
+            const material = new THREE.MeshStandardMaterial({ color: colorHex, metalness: metalnessVal, roughness: roughnessVal });
+            const goldMaterial = new THREE.MeshStandardMaterial({ color: 0xffcc77, metalness: 0.95, roughness: 0.1 });
             
             if (type === 'king') {
-                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 0.7, 48), material);
+                // Base
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.68, 0.75, 64), material);
                 base.position.y = 0;
                 group.add(base);
-                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.55, 0.6, 48), material);
-                body.position.y = 0.45;
+                // Body
+                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.58, 0.65, 64), material);
+                body.position.y = 0.5;
                 group.add(body);
-                const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.38, 0.3, 32), material);
-                neck.position.y = 0.9;
+                // Neck
+                const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.42, 0.35, 48), material);
+                neck.position.y = 0.95;
                 group.add(neck);
-                const topSphere = new THREE.Mesh(new THREE.SphereGeometry(0.32, 48, 48), material);
-                topSphere.position.y = 1.12;
+                // Top sphere
+                const topSphere = new THREE.Mesh(new THREE.SphereGeometry(0.34, 64, 64), material);
+                topSphere.position.y = 1.18;
                 group.add(topSphere);
-                const crossBar = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.08, 0.45), new THREE.MeshStandardMaterial({ color: 0xffcc77, metalness: 0.9 }));
-                crossBar.position.y = 1.32;
+                // Cross
+                const crossBar = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.1, 0.5), goldMaterial);
+                crossBar.position.y = 1.42;
                 group.add(crossBar);
+                const crossVert = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.32, 0.12), goldMaterial);
+                crossVert.position.y = 1.6;
+                group.add(crossVert);
             } 
             else if (type === 'queen') {
-                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.62, 0.7, 48), material);
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 0.75, 64), material);
                 base.position.y = 0;
                 group.add(base);
-                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.52, 0.65, 48), material);
-                body.position.y = 0.48;
+                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.55, 0.7, 64), material);
+                body.position.y = 0.52;
                 group.add(body);
-                const top = new THREE.Mesh(new THREE.SphereGeometry(0.28, 48, 48), material);
-                top.position.y = 1.18;
+                const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.38, 0.4, 48), material);
+                neck.position.y = 1.0;
+                group.add(neck);
+                const top = new THREE.Mesh(new THREE.SphereGeometry(0.3, 64, 64), material);
+                top.position.y = 1.25;
                 group.add(top);
+                const crownRing = new THREE.Mesh(new THREE.TorusGeometry(0.36, 0.07, 48, 80), goldMaterial);
+                crownRing.position.y = 1.4;
+                crownRing.rotation.x = Math.PI / 2;
+                group.add(crownRing);
             }
             else if (type === 'knight') {
-                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 0.65, 48), material);
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.62, 0.7, 64), material);
                 base.position.y = 0;
                 group.add(base);
-                const horseHead = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.7, 32), material);
-                horseHead.position.set(0.2, 0.92, 0);
+                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.52, 0.6, 64), material);
+                body.position.y = 0.48;
+                group.add(body);
+                const horseHead = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.8, 48), material);
+                horseHead.position.set(0.22, 0.98, 0);
+                horseHead.rotation.z = -0.15;
                 group.add(horseHead);
-                const mane = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.35, 0.35, 8), new THREE.MeshStandardMaterial({ color: 0xccaa88 }));
-                mane.position.set(0.45, 1.02, 0);
+                const mane = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.4, 0.4, 12), new THREE.MeshStandardMaterial({ color: 0xccaa88, metalness: 0.6 }));
+                mane.position.set(0.5, 1.08, 0);
                 group.add(mane);
+                const ear = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.25, 16), material);
+                ear.position.set(0.38, 1.32, 0.12);
+                group.add(ear);
+                const eye = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 16), new THREE.MeshStandardMaterial({ color: 0x000000 }));
+                eye.position.set(0.4, 1.2, 0.22);
+                group.add(eye);
             }
             else if (type === 'rook') {
-                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 0.7, 48), material);
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.7, 0.75, 64), material);
                 base.position.y = 0;
                 group.add(base);
-                const tower = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.8, 0.7), material);
-                tower.position.y = 0.55;
+                const tower = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.85, 0.78), material);
+                tower.position.y = 0.6;
                 group.add(tower);
+                // Battlements
+                for (let i = -0.4; i <= 0.4; i+=0.4) {
+                    const merlon = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.22, 0.2), material);
+                    merlon.position.set(i, 1.05, 0.45);
+                    group.add(merlon);
+                    const merlon2 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.22, 0.2), material);
+                    merlon2.position.set(i, 1.05, -0.45);
+                    group.add(merlon2);
+                    const merlon3 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.22, 0.2), material);
+                    merlon3.position.set(0.45, 1.05, i);
+                    group.add(merlon3);
+                    const merlon4 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.22, 0.2), material);
+                    merlon4.position.set(-0.45, 1.05, i);
+                    group.add(merlon4);
+                }
             }
-            else {
-                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.55, 0.6, 48), material);
+            else { // pawn
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.58, 0.65, 64), material);
                 base.position.y = 0;
                 group.add(base);
-                const top = new THREE.Mesh(new THREE.SphereGeometry(0.25, 48, 48), material);
-                top.position.y = 0.85;
+                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.48, 0.6, 64), material);
+                body.position.y = 0.45;
+                group.add(body);
+                const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.35, 0.32, 48), material);
+                neck.position.y = 0.88;
+                group.add(neck);
+                const top = new THREE.Mesh(new THREE.SphereGeometry(0.28, 64, 64), material);
+                top.position.y = 1.08;
                 group.add(top);
             }
             
             group.castShadow = true;
+            group.receiveShadow = false;
             return group;
         }
         
         // --- Comet ---
         const cometGroup = new THREE.Group();
         const cometCore = new THREE.Mesh(
-            new THREE.SphereGeometry(0.55, 48, 48),
-            new THREE.MeshStandardMaterial({ color: 0xff6600, emissive: 0xff3300, emissiveIntensity: 0.8 })
+            new THREE.SphereGeometry(0.6, 64, 64),
+            new THREE.MeshStandardMaterial({ color: 0xff6600, emissive: 0xff3300, emissiveIntensity: 0.9, metalness: 0.3 })
         );
         cometGroup.add(cometCore);
         
         const tailParticles = [];
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 40; i++) {
             const particle = new THREE.Mesh(
-                new THREE.SphereGeometry(0.05, 8, 8),
+                new THREE.SphereGeometry(0.06, 12, 12),
                 new THREE.MeshStandardMaterial({ color: 0xff8844, emissive: 0xff4411 })
             );
             particle.visible = false;
@@ -744,7 +828,7 @@
         }
         
         const cometRing = new THREE.Mesh(
-            new THREE.TorusGeometry(0.7, 0.04, 32, 60),
+            new THREE.TorusGeometry(0.75, 0.05, 48, 80),
             new THREE.MeshStandardMaterial({ color: 0xffaa55, emissive: 0xff5522 })
         );
         cometRing.rotation.x = Math.PI / 2;
@@ -763,30 +847,32 @@
         newsDiv.style.whiteSpace = 'nowrap';
         newsDiv.style.fontWeight = 'bold';
         const newsLabel = new CSS2DObject(newsDiv);
-        newsLabel.position.set(0, 1.0, 0);
+        newsLabel.position.set(0, 1.1, 0);
         cometGroup.add(newsLabel);
         
-        // --- Orbiting Pieces ---
+        // --- Orbiting Pieces (Full Stack Animation - each piece floats and rotates) ---
         const planetsData = [
-            { type: 'queen', color: 0xeeaa44, orbit: 2.6, speed: 0.55, yOff: 0, link: 'https://lichess.org', label: '♕ LICHESS', desc: 'Free online play', icon: '🎮' },
-            { type: 'king', color: 0xdd8855, orbit: 3.7, speed: 0.46, yOff: 0.1, link: 'https://chess.com', label: '♔ CHESS.COM', desc: 'Largest community', icon: '👑' },
-            { type: 'knight', color: 0x88aadd, orbit: 4.8, speed: 0.39, yOff: -0.1, link: '#history', label: '📜 HISTORY', desc: '1500 years of chess', icon: '🏛️' },
-            { type: 'queen', color: 0xccaa77, orbit: 5.9, speed: 0.33, yOff: 0.15, link: '#cognitive', label: '🧠 BRAIN', desc: 'Cognitive benefits', icon: '💡' },
-            { type: 'rook', color: 0xbb9966, orbit: 7.0, speed: 0.28, yOff: -0.05, link: 'https://lichess.org/variant', label: '♟️ VARIANTS', desc: 'Crazyhouse, 960', icon: '🎲' }
+            { type: 'queen', color: 0xeeaa44, orbit: 2.8, speed: 0.52, yOff: 0, link: 'https://lichess.org', label: '♕ LICHESS', desc: 'Free online play', icon: '🎮', rotateSpeed: 0.8 },
+            { type: 'king', color: 0xdd8855, orbit: 3.9, speed: 0.44, yOff: 0.1, link: 'https://chess.com', label: '♔ CHESS.COM', desc: 'Largest community', icon: '👑', rotateSpeed: 0.6 },
+            { type: 'knight', color: 0x88aadd, orbit: 5.0, speed: 0.37, yOff: -0.1, link: '#history', label: '📜 HISTORY', desc: '1500 years of chess', icon: '🏛️', rotateSpeed: 0.9 },
+            { type: 'queen', color: 0xccaa77, orbit: 6.1, speed: 0.31, yOff: 0.15, link: '#cognitive', label: '🧠 BRAIN', desc: 'Cognitive benefits', icon: '💡', rotateSpeed: 0.7 },
+            { type: 'rook', color: 0xbb9966, orbit: 7.2, speed: 0.26, yOff: -0.05, link: 'https://lichess.org/variant', label: '♟️ VARIANTS', desc: 'Crazyhouse, 960', icon: '🎲', rotateSpeed: 0.5 }
         ];
         
         const orbitingPieces = [];
         
         planetsData.forEach(data => {
-            const pieceGroup = createRealisticPiece(data.type, data.color, 0.8);
+            const pieceGroup = createDetailedPiece(data.type, data.color, 0.85);
             pieceGroup.position.y = data.yOff;
             
-            const ringGeo = new THREE.TorusGeometry(data.orbit + 0.06, 0.03, 64, 200);
-            const ringMat = new THREE.MeshStandardMaterial({ color: 0x88aaff, transparent: true, opacity: 0.3 });
+            // Orbit ring
+            const ringGeo = new THREE.TorusGeometry(data.orbit + 0.08, 0.04, 96, 200);
+            const ringMat = new THREE.MeshStandardMaterial({ color: 0x88aaff, transparent: true, opacity: 0.35, emissive: 0x224466 });
             const ring = new THREE.Mesh(ringGeo, ringMat);
             ring.rotation.x = Math.PI / 2;
             pieceGroup.add(ring);
             
+            // CSS Label
             const div = document.createElement('div');
             div.innerHTML = `<strong>${data.icon} ${data.label}</strong><br><span style="font-size:8px;">${data.desc}</span>`;
             div.style.color = '#ffeedd';
@@ -796,8 +882,9 @@
             div.style.padding = '4px 10px';
             div.style.borderRadius = '20px';
             div.style.border = `1px solid ${new THREE.Color(data.color).getStyle()}`;
+            div.style.backdropFilter = 'blur(4px)';
             const labelObj = new CSS2DObject(div);
-            labelObj.position.set(0, 0.95, 0);
+            labelObj.position.set(0, 1.1, 0);
             pieceGroup.add(labelObj);
             
             scene.add(pieceGroup);
@@ -809,16 +896,18 @@
                 angle: Math.random() * Math.PI * 2,
                 yOffset: data.yOff,
                 link: data.link,
-                label: data.label
+                label: data.label,
+                rotateSpeed: data.rotateSpeed,
+                rotationAngle: 0
             });
         });
         
         const cometData = {
             obj: cometGroup,
-            orbitRadius: 8.5,
-            speed: 0.48,
+            orbitRadius: 8.8,
+            speed: 0.45,
             angle: Math.PI,
-            yOffset: 0.2
+            yOffset: 0.25
         };
         
         // --- Tournament Database ---
@@ -913,36 +1002,30 @@
         window.fetchChessNews = function() {
             renderNewsPanel();
             showMessage('✅ Tournaments refreshed!');
+            newsPanel.classList.remove('hidden');
         };
         
-        // --- Mobile-friendly Click Handling (works for both mouse AND touch) ---
+        // --- Mobile-friendly Click Handling ---
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         
-        // Unified handler for both click and touch events
         function handleInteraction(event) {
-            // Prevent default to avoid double-firing on mobile
             event.preventDefault();
             
-            // Get coordinates - works for both mouse and touch
             let clientX, clientY;
             if (event.touches) {
-                // Touch event
                 clientX = event.touches[0].clientX;
                 clientY = event.touches[0].clientY;
             } else {
-                // Mouse event
                 clientX = event.clientX;
                 clientY = event.clientY;
             }
             
-            // Calculate normalized device coordinates (-1 to +1)
             mouse.x = (clientX / renderer.domElement.clientWidth) * 2 - 1;
             mouse.y = -(clientY / renderer.domElement.clientHeight) * 2 + 1;
             
             raycaster.setFromCamera(mouse, camera);
             
-            // Collect all clickable meshes
             const clickableMeshes = [];
             orbitingPieces.forEach(item => {
                 item.obj.children.forEach(child => {
@@ -966,17 +1049,14 @@
                 }
                 
                 if (isComet) {
-                    // Comet animation
                     cometCore.scale.set(1.3, 1.3, 1.3);
                     setTimeout(() => { cometCore.scale.set(1, 1, 1); }, 200);
                     showMessage('📰 Opening Live Tournaments Panel');
-                    const panel = document.getElementById('news-panel');
-                    panel.style.display = 'block';
+                    newsPanel.classList.remove('hidden');
                     renderNewsPanel();
                 } else {
                     const pieceData = orbitingPieces.find(p => p.obj === clickedGroup);
                     if (pieceData) {
-                        // Visual feedback
                         const firstMesh = pieceData.obj.children.find(c => c.isMesh && c.geometry.type !== 'TorusGeometry');
                         if (firstMesh) {
                             firstMesh.scale.set(1.2, 1.2, 1.2);
@@ -998,11 +1078,10 @@
             }
         }
         
-        // Add both mouse and touch event listeners for full mobile support
         window.addEventListener('click', handleInteraction);
         window.addEventListener('touchstart', handleInteraction, { passive: false });
         
-        // --- Animation Loop ---
+        // --- Animation Loop with Full Stack Animations ---
         let lastTimestamp = performance.now();
         
         function animate() {
@@ -1011,34 +1090,53 @@
             lastTimestamp = now;
             
             orbitingPieces.forEach(piece => {
+                // Orbit movement
                 piece.angle += piece.speed * delta;
                 piece.obj.position.x = Math.cos(piece.angle) * piece.orbitRadius;
                 piece.obj.position.z = Math.sin(piece.angle) * piece.orbitRadius;
-                piece.obj.position.y = piece.yOffset + Math.sin(piece.angle * 1.5) * 0.05;
                 
+                // Floating bobbing animation
+                piece.obj.position.y = piece.yOffset + Math.sin(piece.angle * 2.5) * 0.08;
+                
+                // Self-rotation animation (pieces rotate on their own axis)
+                piece.rotationAngle += piece.rotateSpeed * delta;
+                piece.obj.rotation.y = piece.rotationAngle;
+                
+                // Orbit ring rotation
                 const ring = piece.obj.children.find(c => c.geometry && c.geometry.type === 'TorusGeometry');
-                if (ring) ring.rotation.z = piece.angle;
+                if (ring) {
+                    ring.rotation.z = piece.angle;
+                    ring.rotation.x = Math.PI / 2 + Math.sin(piece.angle * 2) * 0.1;
+                }
             });
             
+            // Comet movement
             cometData.angle += cometData.speed * delta;
             cometGroup.position.x = Math.cos(cometData.angle) * cometData.orbitRadius;
             cometGroup.position.z = Math.sin(cometData.angle) * cometData.orbitRadius;
-            cometGroup.position.y = cometData.yOffset + Math.sin(cometData.angle * 2) * 0.08;
+            cometGroup.position.y = cometData.yOffset + Math.sin(cometData.angle * 2.5) * 0.1;
             cometRing.rotation.z = cometData.angle;
+            cometGroup.rotation.y = cometData.angle;
             
+            // Comet tail animation
             const tailDir = new THREE.Vector3(-Math.cos(cometData.angle), 0, -Math.sin(cometData.angle)).normalize();
             for (let i = 0; i < tailParticles.length; i++) {
                 const p = tailParticles[i];
                 p.visible = true;
                 const t = i / tailParticles.length;
-                const offset = tailDir.clone().multiplyScalar(-0.4 - t * 1.0);
+                const offset = tailDir.clone().multiplyScalar(-0.5 - t * 1.2);
                 p.position.copy(offset);
-                const scale = 0.07 * (1 - t);
+                const scale = 0.08 * (1 - t);
                 p.scale.set(scale, scale, scale);
-                p.material.emissiveIntensity = 0.6 * (1 - t);
+                p.material.emissiveIntensity = 0.7 * (1 - t);
             }
             
-            coronaRing.rotation.z += 0.015;
+            // Sun animations
+            coronaRing.rotation.z += 0.02;
+            coronaRing.rotation.x = Math.PI / 2 + Math.sin(Date.now() * 0.002) * 0.1;
+            sunMesh.rotation.y += 0.005;
+            
+            // Starfield rotation
             stars.rotation.y += 0.0003;
             stars2.rotation.x += 0.0002;
             
